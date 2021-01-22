@@ -86,6 +86,22 @@ Index of this file:
 #define IM_OFFSETOF(_TYPE,_MEMBER)  ((size_t)&(((_TYPE*)0)->_MEMBER))           // Offset of _MEMBER within _TYPE. Old style macro.
 #endif
 
+// Debug Tools
+// Use 'Metrics->Tools->Item Picker' to break into the call-stack of a specific item.
+// Consider using github.com/scottt/debugbreak
+#ifndef IM_DEBUG_BREAK
+#if defined(__clang__)
+#define IM_DEBUG_BREAK()    __builtin_debugtrap()
+#elif defined (_MSC_VER)
+#define IM_DEBUG_BREAK()    __debugbreak()
+#elif defined (__GNUC__)    // Not using __builtin_trap() because GCC optimizes away everything that comes after.
+#include <signal.h>         // raise, SIGTRAP
+#define IM_DEBUG_BREAK()    raise(SIGTRAP)
+#else
+#define IM_DEBUG_BREAK()    IM_ASSERT(0)    // It is expected that you define IM_DEBUG_BREAK() into something that will break nicely in a debugger!
+#endif
+#endif // #ifndef IM_DEBUG_BREAK
+
 // Helper Macros - IM_FMTARGS, IM_FMTLIST: Apply printf-style warnings to our formatting functions.
 #if !defined(IMGUI_USE_STB_SPRINTF) && defined(__clang__)
 #define IM_FMTARGS(FMT)             __attribute__((format(printf, FMT, FMT+1)))
